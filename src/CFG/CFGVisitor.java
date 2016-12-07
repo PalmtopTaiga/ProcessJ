@@ -26,7 +26,6 @@ public class CFGVisitor extends Visitor<AST>{
     public CFGVisitor(CFG controlFlowGraph)
     {
         cfg = controlFlowGraph;
-        currentBlock = cfg.createBlock();
     }
     
     public AST visitAnnotation(Annotation at) {
@@ -60,6 +59,7 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitAssignment(Assignment as) {
+        currentBlock.addNode(as);
         return as.visitChildren(this);
     }
 
@@ -68,7 +68,8 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitBlock(Block bl) {
-        return bl.visitChildren(this);
+        bl.visitChildren(this);
+        return null;
     }
 
     public AST visitBreakStat(BreakStat bs) {
@@ -184,7 +185,12 @@ public class CFGVisitor extends Visitor<AST>{
             //link the else if it exists
             cfg.linkBlocks(tmpelse, convergeBlock);
         }
-        
+        else
+        {
+            //if there is no else, then we must link the parent block
+            //with the converging block
+            cfg.linkBlocks(tmpBlock, convergeBlock);
+        }
         
         currentBlock = convergeBlock;
         
@@ -197,10 +203,12 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitImport(Import im) {
+        currentBlock.addNode(im);
         return im.visitChildren(this);
     }
 
     public AST visitInvocation(Invocation in) {
+        currentBlock.addNode(in);
         return in.visitChildren(this);
     }
 
@@ -210,6 +218,7 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitModifier(Modifier mo) {
+        currentBlock.addNode(mo);
         return null;
     }
 
@@ -222,8 +231,6 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitNameExpr(NameExpr ne) {
-   
-        currentBlock.addNode(ne);
         return null;
     }
 
@@ -261,7 +268,7 @@ public class CFGVisitor extends Visitor<AST>{
         newProcBlock.addNode(pd);
         cfg.putBlock(currentBlock);
         currentBlock = newProcBlock;
-        pd.visitChildren(this);
+        super.visitProcTypeDecl(pd);
         return null;
     }
 
@@ -298,7 +305,12 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitReturnStat(ReturnStat rs) {
-        return rs.visitChildren(this);
+        currentBlock.addNode(rs);
+        cfg.putBlock(currentBlock);
+        BasicBlock newBlock = cfg.createBlock();
+        currentBlock = newBlock;
+        rs.visitChildren(this);
+        return null;
     }
 
     public AST visitSequence(Sequence se) {
@@ -345,10 +357,12 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitUnaryPostExpr(UnaryPostExpr up) {
+        currentBlock.addNode(up);
         return up.visitChildren(this);
     }
 
     public AST visitUnaryPreExpr(UnaryPreExpr up) {
+        currentBlock.addNode(up);
         return up.visitChildren(this);
     }
 

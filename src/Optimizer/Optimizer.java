@@ -22,8 +22,8 @@ public class Optimizer {
         System.out.println("**************************************");
         System.out.println("Optimizer Running");
         
+        
         CFG cfg = new CFG(co);
-        co.toString();
         cfg.printCFG();
     }       
     

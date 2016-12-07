@@ -51,19 +51,19 @@ public abstract class AST {
     }
 
     public void print(java.io.PrintStream out, int depth) {
-        out.print("line " + this.intToString(line, 3) + ": ");
-        tab(out, depth * 2);
-        Log.log(this.getClass().getName() + " " + this.toString());
-        for (int c = 0; c < nchildren; c++) {
-            if (children[c] == null) {
-                out.print("line " + this.intToString(line, 3) + ": ");
-                tab(out, depth * 2 + 2);
-                Log.log("empty");
-            } else {
-                children[c].print(out, depth + 1);
-            }
-        }
-    }
+		out.print("line " + this.intToString(line, 3) + ": ");
+		tab(out, depth * 2);
+		out.println(this.getClass().getName() + " " + this.toString());
+		for (int c = 0; c < nchildren; c++) {
+			if (children[c] == null) {
+				out.print("line " + this.intToString(line, 3) + ": ");
+				tab(out, depth * 2 + 2);
+				out.println("empty");
+			} else {
+				children[c].print(out, depth + 1);
+			}
+		}
+	}
 
     public String getname() {
         return "Blah.";

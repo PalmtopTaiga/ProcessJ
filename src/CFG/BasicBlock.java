@@ -33,6 +33,8 @@ public class BasicBlock {
     //set of parents that point to this block
     private Vector<BasicBlock> parents = new Vector<BasicBlock>();
     
+    public String s = "";
+    
     public BasicBlock(int no)
     {
         this.label = "B" + no;
@@ -46,6 +48,7 @@ public class BasicBlock {
     
     public void addNode(AST node)
     {
+        System.out.println("adding " + node.toString() + " to the currentBlock");
         tree.append(node);
     }
     
@@ -75,11 +78,12 @@ public class BasicBlock {
         System.out.println("Procedure: " + proc);
         if(tree.size() > 0)
         {
-            for(int i = 0; i < tree.size()-1;i++)
+            for(int i = 0 ; i < tree.size(); i++)
             {
-                tree.child(i).toString();
-            }
+                tree.child(i).print(System.out);
+            }    
         }
+        System.out.println("Children of this Block:");
         System.out.println(children);
         System.out.println("]");
     }
