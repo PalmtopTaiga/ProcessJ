@@ -12,6 +12,7 @@ import AllocateStackSize.AllocateStackSize;
 import CodeGeneratorC.CodeGeneratorC;
 import CodeGeneratorJava.CodeGeneratorJava;
 import Library.Library;
+import Optimizer.*;
 import Parser.parser;
 import Scanner.Scanner;
 import Utilities.Error;
@@ -101,6 +102,7 @@ public class ProcessJc {
                     sts = true;
                     continue;
                 } else {
+                    System.out.println("Setting scanner");
                     Error.setFileName(argv[i]);
 
                     Error.setPackageName(argv[i]);
@@ -154,10 +156,10 @@ public class ProcessJc {
             // NAME CHECKER
             c.visit(new NameChecker.NameChecker<AST>(globalTypeTable));
             if (Error.errorCount != 0) {
-                //System.out.println("---------- Error Report ----------");
-                //System.out.println(Error.errorCount + " errors in symbol resolution - fix these before type checking.");
-                //System.out.println(Error.errors);
-                System.out.println("** COMPILATION FAILED ** 1");
+                System.out.println("---------- Error Report ----------");
+                System.out.println(Error.errorCount + " errors in symbol resolution - fix these before type checking.");
+                System.out.println(Error.errors);
+                System.out.println("** COMPILATION FAILED **");
                 System.exit(1);
             }
 
@@ -169,28 +171,25 @@ public class ProcessJc {
             c.visit(new TypeChecker.TypeChecker(globalTypeTable));
 
             if (Error.errorCount != 0) {
-                //System.out.println("---------- Error Report ----------");
-                //System.out.println(Error.errorCount + " errors in type checking - fix these before code generation.");
-                //System.out.println(Error.errors);
-		System.out.println("** COMPILATION FAILED ** 2");
-		System.exit(1);
+                System.out.println("---------- Error Report ----------");
+                System.out.println(Error.errorCount + " errors in type checking - fix these before code generation.");
+                System.out.println(Error.errors);
+                System.exit(1);
             }
 
             ////////////////////////////////////////////////////////////////////////////////
             // OTHER SEMANTIC CHECKS
 
-            c.visit(new Reachability.Reachability());	   
+            c.visit(new Reachability.Reachability());
             c.visit(new ParallelUsageCheck.ParallelUsageCheck());
 	    c.visit(new Yield.Yield());
-
-	    if (Error.errorCount != 0) {
-                //System.out.println("---------- Error Report ----------");
-
-		//System.out.println(Error.errors);
-		System.out.println("** COMPILATION FAILED ** 3");
-                System.exit(1);
-	    }
-
+            
+            ////////////////////////////////////////////////////////////////////////////////
+            // OPTIMIZATION
+            
+            new Optimizer((Compilation) c);
+            
+            
             ////////////////////////////////////////////////////////////////////////////////
             // CODE GENERATOR
 
