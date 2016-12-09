@@ -64,6 +64,7 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitBinaryExpr(BinaryExpr be) {
+        currentBlock.addNode(be);
         return be.visitChildren(this);
     }
 
@@ -73,6 +74,11 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitBreakStat(BreakStat bs) {
+        currentBlock.addNode(bs);
+        currentBlock.jumpTarget = -2;
+        cfg.putBlock(currentBlock);
+        BasicBlock newBlock = cfg.createBlock();
+        currentBlock = newBlock;
         return null;
     }
 
@@ -113,11 +119,17 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitContinueStat(ContinueStat cs) {
+        currentBlock.addNode(cs);
+        currentBlock.jumpTarget = -3;
+        cfg.putBlock(currentBlock);
+        BasicBlock newBlock = cfg.createBlock();
+        currentBlock = newBlock;
         return null;
     }
 
     public AST visitDoStat(DoStat ds) {
-        return ds.visitChildren(this);
+       
+        return null;
     }
 
     public AST visitErrorType(ErrorType et) {
@@ -371,6 +383,60 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitWhileStat(WhileStat ws) {
-        return ws.visitChildren(this);
+        /*
+            while(e)
+            {
+                s
+            }
+        */
+        
+        BasicBlock expressionBlock;
+        BasicBlock statBlock;
+        BasicBlock escapeBlock;
+        cfg.putBlock(currentBlock);
+        
+        //create expression block
+        expressionBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        currentBlock = expressionBlock;
+        ws.expr().visit(this);
+        cfg.putBlock(expressionBlock);
+        
+        //create the stat block
+        statBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, statBlock);
+        currentBlock = statBlock;
+        ws.stat().visit(this);
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        cfg.putBlock(currentBlock);
+        
+        //create the escape block
+        escapeBlock = cfg.createBlock();
+        currentBlock = escapeBlock;
+        cfg.linkBlocks(expressionBlock, escapeBlock);
+        
+        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        for(int i = expressionBlock.getNo(); i < escapeBlock.getNo(); i++)
+        {
+            BasicBlock ptr = cfg.getBlock(i);
+            //-2 denotes a break statement
+            if(ptr.jumpTarget == -2)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(escapeBlock);
+            }
+            if(ptr.jumpTarget == -3)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(statBlock);
+            }
+        }
+        
+        
+        
+        return null;
     }
 }

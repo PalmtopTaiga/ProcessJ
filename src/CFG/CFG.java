@@ -33,23 +33,31 @@ public class CFG {
     {
         if(firstBlock)
         {
-            System.out.println("Created the first block - here we go");
+            
             BasicBlock newBlock = new BasicBlock(blockCount);
+            System.out.println("Created block " + newBlock.getLabel());
             blockCount++;
             firstBlock = false;            
             return newBlock;            
         }
         else
         {
-            System.out.println("No longer the first block");
+            
             BasicBlock newBlock = new BasicBlock(blockCount);
+            System.out.println("Created block " + newBlock.getLabel());
             blockCount++;
             return newBlock;
         }
     }
     
+    public BasicBlock getBlock(int i)
+    {
+        return graph.get(i);
+    }
+    
     public void printCFG()
     {
+        System.out.println("The Graph has " + graph.size() +" blocks");
         BasicBlock block = null;
         for(int i = 0; i < graph.size(); i++)
         {
