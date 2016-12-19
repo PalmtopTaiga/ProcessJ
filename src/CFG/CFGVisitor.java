@@ -480,6 +480,7 @@ public class CFGVisitor extends Visitor<AST>{
             System.out.println("Checking of B" + ptr.getNo() + " has a break statement");
             if(ptr.jumpTarget == -2)
             {
+                ptr.jumpTarget = -1;
                 System.out.println("It does");
                 ptr.clearChildren();
                 ptr.addChild(escapeBlock);
