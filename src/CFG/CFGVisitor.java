@@ -129,6 +129,53 @@ public class CFGVisitor extends Visitor<AST>{
 
     public AST visitDoStat(DoStat ds) {
        
+        //create the block to contain the statements for this do while
+        BasicBlock statBlock;
+        cfg.putBlock(currentBlock);
+        statBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, statBlock);
+        currentBlock = statBlock;
+        ds.stat().visit(this);
+        
+        //create the block to contain the expression that this do while uses
+        BasicBlock expressionBlock;
+        cfg.putBlock(currentBlock);
+        expressionBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        currentBlock = expressionBlock;
+        ds.expr().visit(this);
+        
+        cfg.linkBlocks(currentBlock, statBlock);
+        
+        //create the block that the loop will escape to
+        BasicBlock escapeBlock;
+        cfg.putBlock(currentBlock);
+        escapeBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, escapeBlock);
+        currentBlock = escapeBlock;
+        
+        //check for any continues and breaks
+        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        for(int i = statBlock.getNo(); i < escapeBlock.getNo(); i++)
+        {
+            BasicBlock ptr = cfg.getBlock(i);
+            //-2 denotes a break statement
+            if(ptr.jumpTarget == -2)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(escapeBlock);
+            }
+            //-3 denotes a continue statement
+            if(ptr.jumpTarget == -3)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(statBlock);
+            }
+        }
+        
         return null;
     }
 
@@ -145,7 +192,61 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitForStat(ForStat fs) {
-        return fs.visitChildren(this);
+        
+        if(fs.init() !=null)
+        {
+            fs.init().visit(this);
+        }
+        
+        BasicBlock expressionBlock = cfg.createBlock();
+        cfg.putBlock(currentBlock);
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        currentBlock = expressionBlock;
+        
+        if(fs.expr() != null)
+        {
+            fs.expr().visit(this);
+        }
+        
+        BasicBlock statBlock = cfg.createBlock();
+        cfg.putBlock(currentBlock);
+        cfg.linkBlocks(currentBlock, statBlock);
+        currentBlock = statBlock;
+        
+        fs.stats().visit(this);
+        fs.incr().visit(this);
+        
+        BasicBlock escapeBlock = cfg.createBlock();
+        cfg.putBlock(currentBlock);
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        currentBlock = escapeBlock;
+        
+        cfg.linkBlocks(expressionBlock, escapeBlock);
+        
+        //check for any continues and breaks
+        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        for(int i = expressionBlock.getNo(); i < escapeBlock.getNo(); i++)
+        {
+            BasicBlock ptr = cfg.getBlock(i);
+            //-2 denotes a break statement
+            if(ptr.jumpTarget == -2)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(escapeBlock);
+            }
+            //-3 denotes a continue statement
+            if(ptr.jumpTarget == -3)
+            {
+                ptr.jumpTarget = -1;
+                ptr.clearChildren();
+                ptr.addChild(expressionBlock);
+            }
+        }
+        
+        
+        return null;
     }
 
     public AST visitGuard(Guard gu) {
@@ -318,6 +419,7 @@ public class CFGVisitor extends Visitor<AST>{
 
     public AST visitReturnStat(ReturnStat rs) {
         currentBlock.addNode(rs);
+        currentBlock.jumpTarget = -4;
         cfg.putBlock(currentBlock);
         BasicBlock newBlock = cfg.createBlock();
         currentBlock = newBlock;
@@ -345,15 +447,62 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitSwitchGroup(SwitchGroup sg) {
+        
         return sg.visitChildren(this);
     }
 
     public AST visitSwitchLabel(SwitchLabel sl) {
+        currentBlock.addNode(sl);
         return sl.visitChildren(this);
     }
 
     public AST visitSwitchStat(SwitchStat st) {
-        return st.visitChildren(this);
+        st.expr().visit(this);
+        cfg.putBlock(currentBlock);
+        BasicBlock caseBlock;
+        BasicBlock tmp = currentBlock;
+        for(int i = 0; i < st.switchBlocks().size(); i++)
+        {
+            caseBlock = cfg.createBlock();
+            cfg.linkBlocks(tmp, caseBlock);
+            currentBlock = caseBlock;
+            st.switchBlocks().child(i).visit(this);
+            cfg.putBlock(currentBlock);
+        }
+        
+        BasicBlock escapeBlock = cfg.createBlock();
+        cfg.linkBlocks(currentBlock, escapeBlock);
+        
+        for(int i = tmp.getNo()+2; i < escapeBlock.getNo()+1; i++)
+        {
+            BasicBlock ptr = cfg.getBlock(i);
+            //-2 denotes break statement
+            System.out.println("Checking of B" + ptr.getNo() + " has a break statement");
+            if(ptr.jumpTarget == -2)
+            {
+                System.out.println("It does");
+                ptr.clearChildren();
+                ptr.addChild(escapeBlock);
+            }          
+        }
+        for(int i = tmp.getNo()+2; i < escapeBlock.getNo()+1; i++)
+        {
+            BasicBlock ptr = cfg.getBlock(i);
+            //if some blocks in this sequence don't have any children
+            //then they should be linked with the next case over
+            System.out.println("Checking if B" +ptr.getNo() + " has children");
+            if(!ptr.hasChildren())
+            {
+                System.out.println("It doesn't");
+                if(ptr.jumpTarget != -4)
+                {
+                    ptr.addChild(cfg.getBlock(i+1));
+                }            
+            }
+        }
+        
+        currentBlock = escapeBlock;
+        return null;
     }
 
     public AST visitSyncStat(SyncStat st) {

@@ -74,6 +74,15 @@ public class BasicBlock {
         return number;
     }
     
+    public boolean hasChildren()
+    {
+        if(this.children.size() == 0)
+        {
+            return false;
+        }
+        return true;
+    }
+    
     public boolean hasCode()
     {
         if(this.tree.size() > 0)
