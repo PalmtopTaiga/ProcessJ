@@ -50,6 +50,34 @@ public class CFG {
         }
     }
     
+    
+    //this function takes a created cfg that has empty blocks
+    //and closes those gaps, getting rid of the empty blocks
+    public void closeGaps()
+    {
+        BasicBlock ptr = null;
+        BasicBlock parentPtr;
+        for(int i = 0; i < graph.size() ; i++)
+        {
+            ptr = graph.get(i);
+            if(ptr != null)
+            {
+                if(!ptr.hasCode())
+                {
+                    for(int j = 0; j < ptr.parentSize(); j++)
+                    {
+                        parentPtr = ptr.getParent(j);
+                        parentPtr.removeChild(ptr);
+                        for(int k = 0; k < ptr.childSize(); k++)
+                        {
+                            parentPtr.addChild(ptr.getChild(k));
+                        }
+                    }
+                    ptr.nullBlock();
+                }
+            }   
+        }
+    }
     public BasicBlock getBlock(int i)
     {
         return graph.get(i);
@@ -69,8 +97,12 @@ public class CFG {
             }
             else
             {
-                block.print();
+                if(block.hasCode())
+                {
+                    block.print();
+                }
             }
+            
            
             System.out.println("\n");
         }

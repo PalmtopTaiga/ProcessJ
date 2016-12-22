@@ -33,6 +33,9 @@ public class BasicBlock {
     //set of parents that point to this block
     private Vector<BasicBlock> parents = new Vector<BasicBlock>();
     
+    //boolean used to determine if this is the first block of a procedure
+    public boolean firstBlock = false;
+    
     public int jumpTarget = -1;
     
     public String s = "";
@@ -59,14 +62,29 @@ public class BasicBlock {
         parents.add(bl);
     }
     
+    public int childSize()
+    {
+        return this.children.size();
+    }
+    
     public void clearChildren()
     {
         this.children.removeAllElements();
     }
     
+    public BasicBlock getChild(int i)
+    {
+        return children.get(i);
+    }
+    
     public String getLabel()
     {
         return label;
+    }
+    
+    public BasicBlock getParent(int i)
+    {
+        return parents.get(i);
     }
     
     public int getNo()
@@ -91,6 +109,19 @@ public class BasicBlock {
         }
         return false;
     }
+
+    public void nullBlock()
+    {
+        this.children.removeAllElements();
+        this.parents.removeAllElements();
+        
+    }
+
+    public int parentSize()
+    {
+        return this.parents.size();
+    }
+    
     
     public void print()
     {
@@ -106,7 +137,18 @@ public class BasicBlock {
         }
         System.out.println("Children of this Block:");
         System.out.println(children);
+        System.out.println("Parents of this Block:");
+        System.out.println(parents);
         System.out.println("]");
+    }
+    
+    public void removeChild(BasicBlock b)
+    {
+        
+        if(this.children.contains(b))
+        {
+            this.children.remove(b);
+        }
     }
     
     public String toString()

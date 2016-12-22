@@ -43,7 +43,43 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitAltStat(AltStat as) {
-        return as.visitChildren(this);
+        BasicBlock expressionBlock = cfg.createBlock();
+        AltCase acptr = null;
+        cfg.putBlock(currentBlock);
+        cfg.linkBlocks(currentBlock, expressionBlock);
+        currentBlock = expressionBlock;
+        for(int i = 0; i < as.body().size(); i++)
+        {
+            acptr = as.body().child(i);
+            if(acptr.precondition() != null)
+            {
+                acptr.precondition().visit(this);
+            }
+        }
+         
+        cfg.putBlock(currentBlock);
+        BasicBlock guardBlock, statBlock, convergingBlock;
+        
+        convergingBlock = cfg.createBlock();
+        for(int i = 0; i < as.body().size(); i++)
+        {
+            acptr = as.body().child(i);
+            guardBlock = cfg.createBlock();
+            cfg.linkBlocks(expressionBlock, guardBlock);
+            statBlock = cfg.createBlock();
+            currentBlock = guardBlock;
+            acptr.guard().visit(this);
+            cfg.putBlock(currentBlock);
+            
+            cfg.linkBlocks(currentBlock, statBlock);
+            currentBlock = statBlock;
+            acptr.stat().visit(this);
+            cfg.putBlock(currentBlock);
+            cfg.linkBlocks(currentBlock, convergingBlock);
+        }
+        
+        currentBlock = convergingBlock;
+        return null;
     }
 
     public AST visitArrayAccessExpr(ArrayAccessExpr ae) {
@@ -99,7 +135,13 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitChannelReadExpr(ChannelReadExpr cr) {
-        return cr.visitChildren(this);
+        currentBlock.addNode(cr);
+        cr.channel().visit(this);
+        if(cr.extRV() != null)
+        {
+            cr.extRV().visit(this);
+        }
+        return null;
     }
 
     public AST visitChannelWriteStat(ChannelWriteStat cw) {
@@ -184,6 +226,7 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitExprStat(ExprStat es) {
+        //currentBlock.addNode(es);
         return es.visitChildren(this);
     }
 
@@ -360,7 +403,27 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitParBlock(ParBlock pb) {
-        return pb.visitChildren(this);
+        
+        
+        currentBlock.addNode(pb);
+     
+        BasicBlock parentPtr = currentBlock;
+        BasicBlock statBlock;
+        BasicBlock convergingBlock = cfg.createBlock();
+        cfg.putBlock(parentPtr);
+        for(int i = 0; i < pb.stats().size();i++)
+        {
+            statBlock = cfg.createBlock();
+            currentBlock = statBlock;
+            cfg.linkBlocks(parentPtr, currentBlock);
+            pb.stats().child(i).visit(this);
+            cfg.linkBlocks(currentBlock, convergingBlock);
+            cfg.putBlock(currentBlock);
+        }
+        
+        currentBlock = convergingBlock;
+        
+        return null;
     }
 
     public AST visitPragma(Pragma pr) {
@@ -368,6 +431,7 @@ public class CFGVisitor extends Visitor<AST>{
     }
 
     public AST visitPrimitiveLiteral(PrimitiveLiteral li) {
+        
         return null;
     }
 
@@ -381,6 +445,7 @@ public class CFGVisitor extends Visitor<AST>{
         newProcBlock.addNode(pd);
         cfg.putBlock(currentBlock);
         currentBlock = newProcBlock;
+        currentBlock.firstBlock = true;
         super.visitProcTypeDecl(pd);
         return null;
     }
@@ -549,7 +614,14 @@ public class CFGVisitor extends Visitor<AST>{
         expressionBlock = cfg.createBlock();
         cfg.linkBlocks(currentBlock, expressionBlock);
         currentBlock = expressionBlock;
-        ws.expr().visit(this);
+        if(ws.expr() instanceof PrimitiveLiteral)
+        {
+            currentBlock.addNode(ws.expr());
+        }
+        else
+        {
+            ws.expr().visit(this);
+        }
         cfg.putBlock(expressionBlock);
         
         //create the stat block
