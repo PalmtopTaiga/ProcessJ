@@ -25,7 +25,7 @@ public class BasicBlock {
     public String proc = "";
     
     //the AST nodes that this block contains
-    private Sequence tree = new Sequence();
+    public Sequence tree = new Sequence();
     
     //set of children that this block points to
     private Vector<BasicBlock> children = new Vector<BasicBlock>();
@@ -36,9 +36,16 @@ public class BasicBlock {
     //boolean used to determine if this is the first block of a procedure
     public boolean firstBlock = false;
     
+    //used to determine if this block has a break, continue, or return
+    //-1 default
+    //-2 break
+    //-3 continue
     public int jumpTarget = -1;
-    
-    public String s = "";
+   
+    //used for live variable analysis
+    HashSet<String> killSet = new HashSet<String>();
+    HashSet<String> ueVar = new HashSet<String>();
+    HashSet<AST> ueVarNodes = new HashSet<AST>();
     
     public BasicBlock(int no)
     {
@@ -54,7 +61,7 @@ public class BasicBlock {
     public void addNode(AST node)
     {
         System.out.println("adding " + node.getClass().getName() + " to " + this.getLabel());
-        tree.append(node);
+        tree = tree.append(node);
     }
     
     public void addParent(BasicBlock bl)
@@ -110,6 +117,15 @@ public class BasicBlock {
         return false;
     }
 
+    public boolean hasParents()
+    {
+        if(this.parents.size() == 0)
+        {
+            return false;
+        }
+        return true;
+    }
+    
     public void nullBlock()
     {
         this.children.removeAllElements();
@@ -140,6 +156,17 @@ public class BasicBlock {
         System.out.println("Parents of this Block:");
         System.out.println(parents);
         System.out.println("]");
+        System.out.println("killSet of this Block:");
+        System.out.println(killSet);
+        System.out.println("]");
+        System.out.println("ueVar of this Block:");
+        System.out.println(ueVar);
+        System.out.println("]");
+    }
+    
+    public Vector<BasicBlock> getParentVector()
+    {
+        return this.parents;
     }
     
     public void removeChild(BasicBlock b)

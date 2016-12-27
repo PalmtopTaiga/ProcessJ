@@ -118,7 +118,63 @@ public class CFG {
     {
         parent.addChild(child);
         child.addParent(parent);
-        child.proc = parent.proc;
+        if(child.proc.equals(""))
+        {
+            child.proc = parent.proc;
+        }
+    }
+    
+    public void liveVariableAnalysis()
+    {
+        System.out.println("Running Live Variable Analysis");
+        BasicBlock b;
+        AST ast;
+        HashSet<AST> totalUEVar = new HashSet<AST>();
+        Iterator iterator;
+        Iterator totalIterator;
+        for(int i = 0; i < graph.size(); i++)
+        {
+            b = graph.get(i);
+            if(b != null)
+            {
+                System.out.println("Running LVA on " + b.getLabel());
+                new LVAVisitor(b, this);
+            }
+        }
+        System.out.println("LVA complete");
+       
+        for(int i = 0; i < graph.size(); i++)
+        {
+            b = graph.get(i);
+            if(b != null)
+            {
+                if(!b.ueVar.isEmpty())
+                {
+                    iterator = b.ueVarNodes.iterator();
+                    
+                    while(iterator.hasNext())
+                    {
+                        ast = (AST)iterator.next();
+                        totalUEVar.add(ast);
+                    }
+                }
+            }
+        }
+        
+        totalIterator = totalUEVar.iterator();
+        
+        while(totalIterator.hasNext())
+        {
+            ast = (AST)totalIterator.next();
+            if(ast instanceof NameExpr)
+            {
+                System.out.println("Line " + ast.line + ": Variable " + ((NameExpr)ast).name().getname() + " may not have been initialized!");
+            }
+            else if(ast instanceof Var)
+            {
+                System.out.println("Line " + ast.line + ": Variable " + ((Var)ast).name().getname() + " may not have been initialized!");
+            }
+        }
     }
     
 }

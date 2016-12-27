@@ -24,7 +24,11 @@ public class Optimizer {
         
         
         CFG cfg = new CFG(co);
+        cfg.closeGaps();
+        
+        cfg.liveVariableAnalysis();
         cfg.printCFG();
+        
     }       
     
 }
