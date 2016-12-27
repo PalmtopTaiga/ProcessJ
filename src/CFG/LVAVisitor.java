@@ -113,12 +113,12 @@ public class LVAVisitor extends Visitor<AST> {
             System.out.println("Adding " +v.name().getname() + " to the killSet via Var");
             currBlock.killSet.add(v.name().getname());
         }
-        if(v.init() == null)
+        /*if(v.init() == null)
         {
             System.out.println("Addinv " +v.name().getname() + " to the ueVar via Var");
             currBlock.ueVar.add(v.name().getname());
             currBlock.ueVarNodes.add(v);
-        }
+        }*/
         return null;
     }
     
