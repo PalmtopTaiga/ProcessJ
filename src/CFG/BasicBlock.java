@@ -47,6 +47,9 @@ public class BasicBlock {
     HashSet<String> ueVar = new HashSet<String>();
     HashSet<AST> ueVarNodes = new HashSet<AST>();
     
+    //used for reachability
+    public boolean reachable = false;
+    
     public BasicBlock(int no)
     {
         this.label = "B" + no;
@@ -60,7 +63,7 @@ public class BasicBlock {
     
     public void addNode(AST node)
     {
-        System.out.println("adding " + node.getClass().getName() + " to " + this.getLabel());
+        //System.out.println("adding " + node.getClass().getName() + " to " + this.getLabel());
         tree = tree.append(node);
     }
     

@@ -26,8 +26,11 @@ public class Optimizer {
         CFG cfg = new CFG(co);
         cfg.closeGaps();
         
+        cfg.reachability();
+        
         cfg.liveVariableAnalysis();
-        cfg.printCFG();
+        
+        //cfg.printCFG();
         
     }       
     

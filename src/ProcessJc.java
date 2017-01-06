@@ -187,6 +187,7 @@ public class ProcessJc {
             ////////////////////////////////////////////////////////////////////////////////
             // OPTIMIZATION
             
+            
             new Optimizer((Compilation) c);
             
             

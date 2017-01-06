@@ -27,6 +27,7 @@ public class CFG {
         System.out.println("Running CFG builder");
         
         co.visit(new CFGVisitor(this));
+        System.out.println("CFG complete!");
     }
     
     public BasicBlock createBlock()
@@ -35,7 +36,7 @@ public class CFG {
         {
             
             BasicBlock newBlock = new BasicBlock(blockCount);
-            System.out.println("Created block " + newBlock.getLabel());
+            //System.out.println("Created block " + newBlock.getLabel());
             blockCount++;
             firstBlock = false;            
             return newBlock;            
@@ -44,7 +45,7 @@ public class CFG {
         {
             
             BasicBlock newBlock = new BasicBlock(blockCount);
-            System.out.println("Created block " + newBlock.getLabel());
+            //System.out.println("Created block " + newBlock.getLabel());
             blockCount++;
             return newBlock;
         }
@@ -137,7 +138,7 @@ public class CFG {
             b = graph.get(i);
             if(b != null)
             {
-                System.out.println("Running LVA on " + b.getLabel());
+                //System.out.println("Running LVA on " + b.getLabel());
                 new LVAVisitor(b, this);
             }
         }
@@ -168,13 +169,28 @@ public class CFG {
             ast = (AST)totalIterator.next();
             if(ast instanceof NameExpr)
             {
-                System.out.println("Line " + ast.line + ": Variable " + ((NameExpr)ast).name().getname() + " may not have been initialized!");
+                Error.error(ast, "Variable '"+ ((NameExpr)ast).name().getname() + "' may not have been initialized");
+                //System.out.println("Line " + ast.line + ": Variable " + ((NameExpr)ast).name().getname() + " may not have been initialized!");
             }
             else if(ast instanceof Var)
             {
-                System.out.println("Line " + ast.line + ": Variable " + ((Var)ast).name().getname() + " may not have been initialized!");
+                Error.error(ast, "Variable '"+ ((Var)ast).name().getname() + "' may not have been initialized");
+                //System.out.println("Line " + ast.line + ": Variable " + ((Var)ast).name().getname() + " may not have been initialized!");
             }
         }
+    }
+    
+    public void reachability()
+    {
+        for(int i = 0; i < this.graph.size(); i++)
+        {
+            if(graph.elementAt(i).hasParents() || graph.elementAt(i).firstBlock)
+            {
+                graph.elementAt(i).reachable = true;
+            }
+        }
+        
+        
     }
     
 }

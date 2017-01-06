@@ -30,8 +30,8 @@ public class LVAVisitor extends Visitor<AST> {
         cfg = controlFlowGraph;
         if(b.hasParents())
         {
-            System.out.println(b.getLabel() + " does have parents");
-            System.out.println("And they are " +b.getParentVector());
+            //System.out.println(b.getLabel() + " does have parents");
+            //System.out.println("And they are " +b.getParentVector());
             HashSet<String> tmp1;
             HashSet<String> tmp2;
             HashSet<AST> tmp3;
@@ -77,10 +77,7 @@ public class LVAVisitor extends Visitor<AST> {
     
     public AST visitNameExpr(NameExpr ne)
     {
-        /*System.out.println("NameExpr -----");
-        ne.print();
-        System.out.println("--------------");*/
-        //System.out.println("Visiting a name expr");
+
         if(LHS)
         {
             if(currBlock.ueVar.contains(ne.name().getname()));
@@ -88,7 +85,7 @@ public class LVAVisitor extends Visitor<AST> {
                 currBlock.ueVar.remove(ne.name().getname());
                 currBlock.ueVarNodes.remove(ne);
             }
-            System.out.println("Adding "+ ne.name().getname() + " to the killSet via NameExpr");
+            //System.out.println("Adding "+ ne.name().getname() + " to the killSet via NameExpr");
             currBlock.killSet.add(ne.name().getname());
         }
         else
@@ -104,21 +101,13 @@ public class LVAVisitor extends Visitor<AST> {
     
     public AST visitVar(Var v)
     {
-        /*System.out.println("Var ----------");
-        v.print();
-        System.out.println("--------------");*/
-        //System.out.println("visiting a var");
+
         if(v.init() != null)
         {
-            System.out.println("Adding " +v.name().getname() + " to the killSet via Var");
+            //System.out.println("Adding " +v.name().getname() + " to the killSet via Var");
             currBlock.killSet.add(v.name().getname());
         }
-        /*if(v.init() == null)
-        {
-            System.out.println("Addinv " +v.name().getname() + " to the ueVar via Var");
-            currBlock.ueVar.add(v.name().getname());
-            currBlock.ueVarNodes.add(v);
-        }*/
+
         return null;
     }
     

@@ -197,8 +197,8 @@ public class CFGVisitor extends Visitor<AST>{
         currentBlock = escapeBlock;
         
         //check for any continues and breaks
-        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
-                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        //System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+        //        +" through " + escapeBlock.getLabel() + " for any break or continue statements");
         for(int i = statBlock.getNo(); i < escapeBlock.getNo(); i++)
         {
             BasicBlock ptr = cfg.getBlock(i);
@@ -267,8 +267,8 @@ public class CFGVisitor extends Visitor<AST>{
         cfg.linkBlocks(expressionBlock, escapeBlock);
         
         //check for any continues and breaks
-        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
-                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        //System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+        //        +" through " + escapeBlock.getLabel() + " for any break or continue statements");
         for(int i = expressionBlock.getNo(); i < escapeBlock.getNo(); i++)
         {
             BasicBlock ptr = cfg.getBlock(i);
@@ -637,8 +637,8 @@ public class CFGVisitor extends Visitor<AST>{
         currentBlock = escapeBlock;
         cfg.linkBlocks(expressionBlock, escapeBlock);
         
-        System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
-                +" through " + escapeBlock.getLabel() + " for any break or continue statements");
+        //System.out.println("We are going to check blocks " + expressionBlock.getLabel() 
+        //        +" through " + escapeBlock.getLabel() + " for any break or continue statements");
         for(int i = expressionBlock.getNo(); i < escapeBlock.getNo(); i++)
         {
             BasicBlock ptr = cfg.getBlock(i);
