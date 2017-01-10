@@ -30,8 +30,8 @@ public class Optimizer {
         
         cfg.liveVariableAnalysis();
         
-        //cfg.printCFG();
         
+        //cfg.printCFG();
     }       
     
 }

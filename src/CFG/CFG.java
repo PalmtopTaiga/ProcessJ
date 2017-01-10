@@ -20,6 +20,7 @@ public class CFG {
     private boolean firstBlock = true;
     private int blockCount = 0;
     private int blocksInGraph = 0;
+    private HashSet<BasicBlock> unreachableBlocks = new HashSet<BasicBlock>();
     
     public CFG(Compilation co)
     {
@@ -182,15 +183,44 @@ public class CFG {
     
     public void reachability()
     {
+        System.out.println("Running reachability check of blocks");
         for(int i = 0; i < this.graph.size(); i++)
         {
-            if(graph.elementAt(i).hasParents() || graph.elementAt(i).firstBlock)
+            if(graph.elementAt(i) != null)
             {
-                graph.elementAt(i).reachable = true;
+                if(graph.elementAt(i).firstBlock)
+                {
+                    recursiveReachable(graph.elementAt(i));
+                }
             }
+        }
+        System.out.println("Finished finding unreachable blocks");
+        
+        for(int i = 0; i < this.graph.size(); i++)
+        {
+            if(graph.elementAt(i) != null)
+            {
+                if(!graph.elementAt(i).reachable)
+                {
+                    unreachableBlocks.add(graph.elementAt(i));
+                }
+            }   
         }
         
         
+        
+    }
+    
+    public void recursiveReachable(BasicBlock b)
+    {
+        b.reachable = true;
+        for(int i = 0; i < b.childSize(); i++)
+        {
+            if(!b.getChild(i).reachable)
+            {
+                recursiveReachable(b.getChild(i));
+            }    
+        }
     }
     
 }
