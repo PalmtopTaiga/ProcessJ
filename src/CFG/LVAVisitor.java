@@ -53,8 +53,8 @@ public class LVAVisitor extends Visitor<AST> {
         /*System.out.println("ParamDecl ----");
         pd.print();
         System.out.println("--------------");
-        //System.out.println("visiting a paramdecl");
-        //System.out.println("Adding "+ pd.name() + " to the killSet via ParamDecl");*/
+        //System.out.println("visiting a paramdecl");*/
+        //System.out.println("Adding "+ pd.name() + " to the killSet via ParamDecl");
         currBlock.killSet.add(pd.name());
         return null;
     }
@@ -92,8 +92,11 @@ public class LVAVisitor extends Visitor<AST> {
         {
             if(!currBlock.killSet.contains(ne.name().getname()))
             {
-                currBlock.ueVar.add(ne.name().getname());
-                currBlock.ueVarNodes.add(ne);
+                if(!((LocalDecl) ne.myDecl).type().isChannelType())
+                {
+                    currBlock.ueVar.add(ne.name().getname());
+                    currBlock.ueVarNodes.add(ne);
+                }
             }
         }
         return null;

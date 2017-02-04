@@ -157,6 +157,7 @@ public class CFG {
                     while(iterator.hasNext())
                     {
                         ast = (AST)iterator.next();
+                        System.out.println("adding " + ast + " to the totalUEvar set");
                         totalUEVar.add(ast);
                     }
                 }
